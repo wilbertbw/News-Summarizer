@@ -11,7 +11,9 @@ Note: You will not be judged on the quality of the LLM’s output.
 '''
 import requests
 from bs4 import BeautifulSoup
+import openai
 
+openai.api_key = ""
 
 def fetch_article_links(site_url):
   data = requests.get(site_url)
@@ -48,3 +50,19 @@ def get_article_content(url):
     'title': title,
     'content': article_text
   }
+
+def summarize_with_llm(article):
+  query = "Can you help summarize this article?\nThe title is: "
+  query += article['title']
+  query += "\nThe contents are below:\n"
+  query += article['content']
+
+  messages = [{"role": "system", "content": "You are a intelligent assistant."}]
+
+  messages.append({"role": "user", "content": query})
+  
+  chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+
+  reply = chat.choices[0].message.content
+  
+  return reply
