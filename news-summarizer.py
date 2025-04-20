@@ -9,4 +9,42 @@ Tip:  use any LLM you want for this task.  For example:  https://console.groq.co
 
 Note: You will not be judged on the quality of the LLM’s output.
 '''
+import requests
+from bs4 import BeautifulSoup
 
+
+def fetch_article_links(site_url):
+  data = requests.get(site_url)
+  soup = BeautifulSoup(data.text)
+  a_tags = soup.find_all('a')
+  links = []
+
+  for i in range(7):
+    links.append(a_tags[i].get("href"))
+  
+  return links
+
+def get_article_content(url):
+  data = requests.get(url)
+  soup = BeautifulSoup(data.text)
+
+  title_tag = soup.select_one("h1")
+  title = "No title found"
+  if (title_tag):
+    title = title_tag.text.strip()
+  
+  # article is in the <p> in the <div> with class="story"
+
+  article_div = data.select_one(".story")
+  article_text = "Could not extract article."
+
+  if (article_div):
+    article_paragraphs = article_div.select('p')
+
+    for paragraph in article_paragraphs:
+      article_text = " ".join(paragraph.text.strip())
+  
+  return {
+    'title': title,
+    'content': article_text
+  }
