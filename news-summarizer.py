@@ -71,9 +71,6 @@ def get_article_content(url):
       article_text += paragraph.text.strip()
       article_text += " "
   
-  # print("Article Title: ", title)
-  # print("Article Content: ", article_text)
-  
   return {
     'title': title,
     'content': article_text
@@ -105,7 +102,7 @@ def main():
     print("\n")
 
     lines = []
-    lines.append("Summary of Article #"  + str(i + 1) + "\n")
+    lines.append("\nSummary of Article #"  + str(i + 1) + "\n")
     lines.append(response + "\n")
 
     with open("output.txt", "a") as file:
