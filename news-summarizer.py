@@ -104,5 +104,12 @@ def main():
     print(response)
     print("\n")
 
+    lines = []
+    lines.append("Summary of Article #"  + str(i + 1) + "\n")
+    lines.append(response + "\n")
+
+    with open("output.txt", "a") as file:
+      file.writelines(lines)
+
 if __name__ == "__main__":
   main()
