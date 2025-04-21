@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import time
 from google import genai
 
-client = genai.Client(api_key = "API_KEY_HERE")
+client = genai.Client(api_key = "API_key_here")
 
 def fetch_article_links(site_url):
   headers = {
@@ -15,31 +15,36 @@ def fetch_article_links(site_url):
 
   links = []
 
-  article_cards = soup.select('.card')
+  video_cards = soup.select('.flag-video')
+  for video_card in video_cards:
+      video_card.decompose()
+  
+  live_cards = soup.select('.flag-live')
+  for live_card in live_cards:
+      live_card.decompose()
+
+  article_cards = soup.select('.cardText')
   headline_cards = soup.select('.primaryHeadlineLink')
 
-  for headline in headline_cards:
-    parent = headline.parent
-    if (headline.select_one('.flag-video') or (parent and parent.select_one('.flag-video'))):
-      continue
-    
-    if headline and 'href' in headline.attrs:
-      url = headline['href']
-      if not url.startswith('http'):
-          url = f"https://www.cbc.ca{url}"
-      if url not in links:
-          links.append(url)
+  if not headline_cards[0].select_one('.flag-video'):
+    url = headline_cards[0].get("href")
+    if not url.startswith('http'):
+      url = f"https://www.cbc.ca{url}"
+    links.append(url)
+
+  
   
   for card in article_cards:
     if card.select_one('.flag-video'):
       continue
       
-    link_element = card.select_one('a')
-    if link_element and 'href' in link_element.attrs:
-      url = link_element['href']
-      if not url.startswith('http'):
-          url = f"https://www.cbc.ca{url}"
-      links.append(url)
+    url = card.get("href")
+    if url.startswith("https://newsinteractives.cbc.ca/"):
+      continue
+    
+    if not url.startswith('http'):
+      url = f"https://www.cbc.ca{url}"
+    links.append(url)
 
   return links[:7]
 
@@ -54,15 +59,20 @@ def get_article_content(url):
   title = "No title found"
   if (title_tag):
     title = title_tag.text.strip()
+  
 
   article_div = soup.select(".story")
   article_text = ""
 
-  for article in article_div:
+  for article in article_div:   
     article_paragraphs = article.select('p')
 
     for paragraph in article_paragraphs:
       article_text += paragraph.text.strip()
+      article_text += " "
+  
+  print("Article Title: ", title)
+  print("Article Content: ", article_text)
   
   return {
     'title': title,
@@ -85,14 +95,14 @@ def main():
   article_links = fetch_article_links(site_url)
 
   summaries = []
-  
-  response = summarize_with_llm(get_article_content(article_links[0]))
+  for i in range(len(article_links)):
+    response = get_article_content(article_links[i])
 
-  summaries.append(response)
+    # summaries.append(response)
 
-  print("Summary of Article #", 1)
-  print(response)
-  print("\n")
+    # print("Summary of Article #", i + 1)
+    # print(response)
+    # print("\n")
 
 if __name__ == "__main__":
   main()
