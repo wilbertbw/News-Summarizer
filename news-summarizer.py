@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
-import openai
 import time
+from google import genai
 
-openai.api_key = ""
+client = genai.Client(api_key = "API_KEY_HERE")
 
 def fetch_article_links(site_url):
   headers = {
@@ -75,34 +75,24 @@ def summarize_with_llm(article):
   query += "\nThe contents are below:\n"
   query += article['content']
 
-  messages = [{"role": "system", "content": "You are a intelligent assistant that summarizes news articles concisely and accurately."}]
-
-  messages.append({"role": "user", "content": query})
+  response = client.models.generate_content(model = "gemini-2.0-flash", contents = query)
   
-  chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
-
-  reply = chat.choices[0].message.content
-  
-  return reply
+  return response.text
 
 def main():
   site_url = "https://www.cbc.ca/news"
 
   article_links = fetch_article_links(site_url)
 
-  articles = []
   summaries = []
+  
+  response = summarize_with_llm(get_article_content(article_links[0]))
 
-  for i in range(len(article_links)):
-    reply = summarize_with_llm(get_article_content(article_links[i]))
+  summaries.append(response)
 
-    summaries.append(reply)
-
-    print("Summary of Article #", i + 1)
-    print(reply)
-    print("\n")
-
-    time.sleep(3)
+  print("Summary of Article #", 1)
+  print(response)
+  print("\n")
 
 if __name__ == "__main__":
   main()
