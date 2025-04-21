@@ -71,8 +71,8 @@ def get_article_content(url):
       article_text += paragraph.text.strip()
       article_text += " "
   
-  print("Article Title: ", title)
-  print("Article Content: ", article_text)
+  # print("Article Title: ", title)
+  # print("Article Content: ", article_text)
   
   return {
     'title': title,
@@ -96,13 +96,13 @@ def main():
 
   summaries = []
   for i in range(len(article_links)):
-    response = get_article_content(article_links[i])
+    response = summarize_with_llm(get_article_content(article_links[i]))
 
-    # summaries.append(response)
+    summaries.append(response)
 
-    # print("Summary of Article #", i + 1)
-    # print(response)
-    # print("\n")
+    print("Summary of Article #", i + 1)
+    print(response)
+    print("\n")
 
 if __name__ == "__main__":
   main()
